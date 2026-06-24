@@ -1,7 +1,9 @@
 "use client";
 
+import type { Contest } from "@/types/contest";
+
 interface SidePanelProps {
-  contest: any;
+  contest?: Contest;
   onClose: () => void;
 }
 
