@@ -8,8 +8,9 @@ import SidePanel from "@/components/SidePanel";
 import LoadingState from "@/components/LoadingState";
 import EmptyState from "@/components/EmptyState";
 import ErrorState from "@/components/ErrorState";
+import type { Contest } from "@/types/contest";
 
-const MOCK_DATA = [
+const MOCK_DATA: Contest[] = [
   { id: "1", title: "제 12회 전국 초등학생 창의력 과학 경진대회", host: "한국과학창의재단", period: "2024.06.01 - 2024.07.15", posterImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuBZobui5IcgsEq7Tav17rTnkgys1KuQUKWYI92wnJiaq0rMaUNYLB8L7GwS9h9k5lmMqx8aZ6MQivFW4bJPHGwvWXR3Jd8hlgRKS_m0F59jW-pKtaKT7QAPVrpSqT_ESxgJdjmV48CftOu1s2SjoExYCUf-DXpHacH8wiHO1PYIOOQLJm3ldHGzl8Eh6tdfJOH--qtS3YslAOVMgvWrI_ieV2vRS20oEoD4XU-CKpfmcGt4lVN06H-CGAFT9ZjQ_4jFX15kj4-_ng", ageBadgeText: "초등학생 가능", ageBadgeColor: "bg-[#26C6DA]", statusBadgeText: "D-15", statusBadgeColor: "text-[#137fec] border-[#137fec]/20" },
   { id: "2", title: "전국 청소년 디지털 미디어 콘텐츠 공모전", host: "방송통신위원회", period: "2024.05.10 - 2024.06.30", posterImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuAk82SXvNHcNLWTBhQ6u8X3OJQhiKxvCDWzzilW3kUVrwPLjUMGNz1T9COgsUwaA9l58Q4kxukO9fSY_mDyx1h5ABHRlhNbSqYtdc1lmx6UFnG6nV4JD-io8xtXkzLpER_Tws2lCdpBAZIrzwoPgJiAcuvGSlJt579mJcHLdaN1WGPUe-hb0G-Qdf_-4qVsl9Al2aOnILYelj-TEAao-ukAtGtNWVhkkCLhMqkpcSgsJVOEiQKKUdu8MpRnA5JnPVPBw_CeJvoI_w", ageBadgeText: "중학생 이상", ageBadgeColor: "bg-[#1A237E]", statusBadgeText: "D-3", statusBadgeColor: "text-rose-600 border-rose-200" },
   { id: "3", title: "제 5회 꿈나무 글짓기 및 독후감 경진대회", host: "국립중앙도서관", period: "2024.06.15 - 2024.08.10", posterImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuA4o7qs1c7yROcN-fZbFkDgqKuDTeUn6sfV1mHLkilAwvWaI-D8iduCgsw8BdsBFA_3TL1rJpL9uy3_s89flw7jqCnSaLhTAzzT1VFvXe9cBvoT2OdCiozrIIv8qv76Pz09haZznw7VQyowCWCxzJ3rsZ30EOdLwIdF5a8Q7HLued3tAbIx-O13HQ41Fm6Zduzsbmzu_lndfhJVj_MVI1V2zkXY9jXh2J64uZQ99_SioIzqtbci2GBriEvztzVm_9Wg5rJ7xPynJg", ageBadgeText: "초등학생 가능", ageBadgeColor: "bg-[#26C6DA]", statusBadgeText: "D-21", statusBadgeColor: "text-[#137fec] border-[#137fec]/20" },
@@ -30,7 +31,7 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  const selectedContest = MOCK_DATA.find(c => c.id === selectedId);
+  const selectedContest = MOCK_DATA.find((contest) => contest.id === selectedId);
 
   // Demo controls to showcase UI states to User
   const triggerError = () => setViewState('error');
