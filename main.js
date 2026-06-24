@@ -1,4 +1,5 @@
-const { app, BrowserWindow, protocol } = require('electron');
+/* eslint-disable @typescript-eslint/no-require-imports */
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
@@ -6,9 +7,52 @@ const http = require('http');
 let mainWindow;
 let server;
 
+function isPathInside(parentPath, childPath) {
+  const relativePath = path.relative(parentPath, childPath);
+  return relativePath === '' || (!relativePath.startsWith('..') && !path.isAbsolute(relativePath));
+}
+
+function resolveStaticFilePath(staticRoot, requestUrl = '/') {
+  let pathname;
+
+  try {
+    pathname = new URL(requestUrl, 'http://127.0.0.1').pathname;
+    pathname = decodeURIComponent(pathname);
+  } catch {
+    return { errorStatus: 400, errorMessage: 'Bad Request' };
+  }
+
+  const requestPath = pathname === '/' ? 'index.html' : pathname.replace(/^[/\\]+/, '');
+  const filePath = path.resolve(staticRoot, requestPath);
+
+  if (!isPathInside(staticRoot, filePath)) {
+    return { errorStatus: 403, errorMessage: 'Forbidden' };
+  }
+
+  return { filePath };
+}
+
+function sendText(res, statusCode, message) {
+  res.writeHead(statusCode, { 'Content-Type': 'text/plain' });
+  res.end(message);
+}
+
+function sendIndexFallback(staticRoot, res) {
+  fs.readFile(path.join(staticRoot, 'index.html'), (err, fallback) => {
+    if (err) {
+      sendText(res, 500, 'Internal Server Error');
+      return;
+    }
+
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(fallback);
+  });
+}
+
 // Simple static file server to serve the Next.js export
 function startServer(staticDir) {
   return new Promise((resolve) => {
+    const staticRoot = path.resolve(staticDir);
     const mimeTypes = {
       '.html': 'text/html',
       '.js': 'application/javascript',
@@ -31,10 +75,14 @@ function startServer(staticDir) {
     };
 
     server = http.createServer((req, res) => {
-      let filePath = path.join(staticDir, req.url === '/' ? 'index.html' : req.url);
-      
-      // Remove query strings
-      filePath = filePath.split('?')[0];
+      const resolvedPath = resolveStaticFilePath(staticRoot, req.url);
+
+      if (resolvedPath.errorStatus) {
+        sendText(res, resolvedPath.errorStatus, resolvedPath.errorMessage);
+        return;
+      }
+
+      const { filePath } = resolvedPath;
 
       const ext = path.extname(filePath).toLowerCase();
       const contentType = mimeTypes[ext] || 'application/octet-stream';
@@ -43,22 +91,13 @@ function startServer(staticDir) {
         if (err) {
           if (err.code === 'ENOENT') {
             // Serve index.html for SPA routing
-            fs.readFile(path.join(staticDir, 'index.html'), (err2, fallback) => {
-              if (err2) {
-                res.writeHead(500);
-                res.end('Internal Server Error');
-              } else {
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.end(fallback, 'utf-8');
-              }
-            });
+            sendIndexFallback(staticRoot, res);
           } else {
-            res.writeHead(500);
-            res.end('Internal Server Error');
+            sendText(res, 500, 'Internal Server Error');
           }
         } else {
           res.writeHead(200, { 'Content-Type': contentType });
-          res.end(content, 'utf-8');
+          res.end(content);
         }
       });
     });

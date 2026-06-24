@@ -1,15 +1,8 @@
 "use client";
 
-interface ContestCardProps {
-  id: string;
-  title: string;
-  host: string;
-  period: string;
-  posterImage: string;
-  ageBadgeText: string;
-  ageBadgeColor: string;
-  statusBadgeText: string;
-  statusBadgeColor: string;
+import type { Contest } from "@/types/contest";
+
+interface ContestCardProps extends Contest {
   onClick: () => void;
   isSelected?: boolean;
 }
